@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
-import {Button, Card, CardSection, Input} from './common';
-import { connect } from 'react-redux';
-import {emailChanged, passwordChanged, loginUser} from '../actions'
+import {Button, Card, CardSection, Input, Spinner} from './common';
+import {Text} from 'react-native';
+import {connect} from 'react-redux';
+import {emailChanged, loginUser, passwordChanged} from '../actions'
 
 class LoginForm extends Component {
     onEmailChange(text) {
@@ -16,6 +17,18 @@ class LoginForm extends Component {
         console.log(this.props);
         const {email, password} = this.props;
         this.props.loginUser({email, password});
+    }
+
+    renderButton() {
+        if (this.props.loading) {
+            return <Spinner size="large"/>;
+        }
+
+        return (<Button
+            onPress={this.onButtonPress.bind(this)}
+        >
+            Login
+        </Button>);
     }
 
     render() {
@@ -39,27 +52,36 @@ class LoginForm extends Component {
                     />
                 </CardSection>
 
+                <Text
+                    style={styles.errorTextStyle}
+                >
+                    {this.props.error}
+                </Text>
+
                 <CardSection>
-                    <Button
-                        onPress={this.onButtonPress.bind(this)}
-                    >
-                        Login
-                    </Button>
+                    {this.renderButton()}
                 </CardSection>
             </Card>
         );
     }
 }
 
-const mapStateToProps = state => {
-    return {
-        email: state.auth.email,
-        password: state.auth.password
-    };
+const styles = {
+    errorTextStyle: {
+        fontSize: 20,
+        alignSelf: 'center',
+        color: 'red',
+    }
+};
+
+const mapStateToProps = ({auth}) => {
+    const {email, password, error, loading} = auth;
+
+    return {email, password, error, loading};
 };
 
 export default connect(mapStateToProps, {
-        emailChanged,
-        passwordChanged,
-        loginUser
-    })(LoginForm)
+    emailChanged,
+    passwordChanged,
+    loginUser
+})(LoginForm)
